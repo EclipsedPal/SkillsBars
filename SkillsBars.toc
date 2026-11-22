@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: SkillsBars
+## Notes: Draggable bars showing your weapon skills, Defense and any other skill you pick.
+## Author: EclipsedPal
+## Version: 1.3.0
+## SavedVariables: SkillsBarsDB
+## SavedVariablesPerCharacter: SkillsBarsCharDB
+
+SkillsBars.lua
