@@ -1,0 +1,25 @@
+name: Release
+
+# Runs when a version tag is pushed, e.g.  git tag v1.3.1; git push --tags
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # needed to create the GitHub release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, used for the changelog
+
+      # Builds the zip and uploads it to CurseForge (project ID from the .toc)
+      # and to a GitHub release.
+      - uses: BigWigsMods/packager@v2
