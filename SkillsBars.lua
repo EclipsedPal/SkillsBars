@@ -229,6 +229,49 @@ local function ApplyPosition()
     end
 end
 
+-- Weapon skills whose details (hit/crit/glancing) the Skills window shows
+local WEAPON_SKILLS = { [SKILL_UNARMED] = true }
+for _, id in pairs(SUBCLASS_TO_SKILL) do WEAPON_SKILLS[id] = true end
+
+-- Runs the Skills window's own code (SkillDetailFrameMixin:AddWeaponSkillRows)
+-- on a stand-in pane that records the rows instead of drawing them, so the
+-- numbers are exactly the ones Blizzard shows. Returns a list of rows or nil.
+local function GetSkillDetailRows(info)
+    local M = SkillDetailFrameMixin
+    if type(M) ~= "table" or type(M.AddWeaponSkillRows) ~= "function" then return nil end
+    local rows = {}
+    local pane = {
+        AddSpacer     = function() rows[#rows + 1] = { kind = "spacer" } end,
+        AddCategory   = function(_, text) rows[#rows + 1] = { kind = "category", text = text } end,
+        AddWrappedRow = function(_, text, color) rows[#rows + 1] = { kind = "text", text = text, color = color } end,
+        AddRow        = function(_, text, color) rows[#rows + 1] = { kind = "text", text = text, color = color } end,
+        AddIconRow    = function() end,
+    }
+    setmetatable(pane, { __index = M })
+    local ok = pcall(M.AddWeaponSkillRows, pane, info)
+    if not ok or #rows == 0 then return nil end
+    return rows
+end
+
+local function AddSkillDetails(tooltip, info)
+    local rows = WEAPON_SKILLS[info.skillID] and GetSkillDetailRows(info)
+    if not rows then return end
+    for _, row in ipairs(rows) do
+        if row.kind == "spacer" then
+            tooltip:AddLine(" ")
+        elseif row.kind == "category" and row.text then
+            tooltip:AddLine(row.text, 1, 1, 1)
+        elseif row.text then
+            local r, g, b = 1, 0.82, 0
+            if type(row.color) == "table" and row.color.GetRGB then r, g, b = row.color:GetRGB() end
+            -- Blizzard separates the lines with blank lines: keep them compact here
+            for line in (row.text .. "\n\n"):gmatch("(.-)\n\n") do
+                if line ~= "" then tooltip:AddLine(line, r, g, b, true) end
+            end
+        end
+    end
+end
+
 local function ShowTooltip(self)
     local d = self.data
     if not d then return end
@@ -245,6 +288,10 @@ local function ShowTooltip(self)
     else
         GameTooltip:AddLine("Maxed for your level", 0.2, 1, 0.2)
     end
+    if d.description and d.description ~= "" then
+        GameTooltip:AddLine(d.description, 0.8, 0.8, 0.8, true)
+    end
+    AddSkillDetails(GameTooltip, d)
     if not db.locked then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine("Drag to move. /sb lock to lock.", 0.6, 0.6, 0.6)
@@ -623,6 +670,7 @@ ev:SetScript("OnEvent", function(self, event, arg1)
         if arg1 ~= ADDON then return end
         SkillsBarsDB = SkillsBarsDB or {}
         db = SkillsBarsDB
+        db.probe = nil -- leftover from a debugging build
         for k, v in pairs(DEFAULTS) do
             if db[k] == nil then db[k] = v end
         end

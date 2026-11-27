@@ -12,7 +12,7 @@ SkillsBars puts all the skills you care about in one compact, movable block. Equ
 - **Color-coded progress**: the bar color tells you at a glance how close you are to the cap (see below).
 - **Skill-up swipe**: a light band slides across the bar every time a skill goes up.
 - **Weapon tooltips**: weapon tooltips show your current skill / max for that weapon type, or "Not learned".
-- **Detailed bar tooltips**: level, bonus from gear/talents, and points remaining.
+- **Detailed bar tooltips**: level, bonus from gear/talents and points remaining. Weapon skills also show the same details as the Skills window: hit and crit chance against an equal-level enemy and against raid bosses, plus glancing blows.
 - **Movable and resizable**: drag the block anywhere, resize it from the bottom-right corner, change the scale, or lock it in place.
 - **Hide maxed skills**: optionally hide bars that are already at the cap for your level.
 - **Minimap button**: left-click for the menu, right-click to show/hide the panel, drag to move it around the minimap.
